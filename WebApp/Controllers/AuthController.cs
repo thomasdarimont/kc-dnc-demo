@@ -20,12 +20,12 @@ namespace WebApp.Controllers
         [Authorize]
         public async Task Logout()
         {
+            await HttpContext.SignOutAsync("Cookies");
             await HttpContext.SignOutAsync("Keycloak", new AuthenticationProperties
             {
                 RedirectUri = Url.Action("Index", "Home")
             });
 
-            await HttpContext.SignOutAsync("Cookies");
         }
 
         [HttpPost]

@@ -1,8 +1,8 @@
 namespace WebApp.Models
 {
-    public class ApiResponse
+    public class ApiResponseModel
     {
-        private string Info1 { get; set; }
-        private string Info2 { get; set; }
+        public string UserData { get; set; }
+        public string AdminData { get; set; }
     }
 }
