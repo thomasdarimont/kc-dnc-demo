@@ -15,10 +15,8 @@ namespace WebApi.Jwt
     {
         public static void ConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            var config = configuration.GetSection("Jwt");
-            string audience = config.GetValue<string>("Audience");
-            string issuer = config.GetValue<string>("Issuer");
-//            TimeSpan tokenExpirationTime = TimeSpan.FromMinutes(config.GetValue<int>("TokenExpirationTimeMinutes", 1));
+            string audience = configuration["Jwt:Audience"];
+            string issuer = configuration["Jwt:Issuer"];
 
             services.AddAuthentication(options => { options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; })
                 .AddJwtBearer(options =>
@@ -42,12 +40,12 @@ namespace WebApi.Jwt
                         OnTokenValidated = context =>
                         {
                             // Extract Keycloak Client Roles from JWT
-                            
+
                             var resourceAccess = JObject.Parse(context.Principal.FindFirst("resource_access").Value);
                             var clientResource = resourceAccess[context.Principal.FindFirstValue("aud")];
                             var clientRoles = clientResource["roles"];
                             var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-                            
+
                             foreach (var clientRole in clientRoles)
                             {
                                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, clientRole.ToString()));

@@ -43,59 +43,15 @@ namespace WebApp
                 })
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
                     options => { options.AccessDeniedPath = "/Home/Error"; })
-                .AddOpenIdConnect("Keycloak", options =>
+                .AddKeycloakAuthentication(options =>
                 {
                     options.Authority = Configuration["Authentication:Keycloak:Authority"];
                     options.ClientId = Configuration["Authentication:Keycloak:ClientId"];
                     options.ClientSecret = Configuration["Authentication:Keycloak:ClientSecret"];
-                    options.ResponseType = "code";
-
-                    // Configure the scope
-                    options.Scope.Clear();
-                    options.Scope.Add("openid");
-                    options.Scope.Add("profile");
-                    options.CallbackPath = new PathString("/oauth/callback");
-                    options.SignedOutCallbackPath = new PathString("/oauth/logout");
 
                     options.RequireHttpsMetadata = false;
-                    options.SaveTokens = true;
-                    options.RemoteSignOutPath = "/keycloak/k_logout";
-                    options.SignedOutRedirectUri = "/";
-
-                    options.Events = new OpenIdConnectEvents
-                    {
-                        OnTokenValidated = context =>
-                        {
-                            var resourceAccess = JObject.Parse(context.Principal.FindFirst("resource_access").Value);
-                            var clientResource = resourceAccess[context.Options.ClientId];
-                            var clientRoles = clientResource["roles"];
-                            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-                            if (claimsIdentity == null)
-                            {
-                                return Task.CompletedTask;
-                            }
-
-                            foreach (var clientRole in clientRoles)
-                            {
-                                claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, clientRole.ToString()));
-                            }
-
-                            return Task.CompletedTask;
-                        },
-
-                        OnRedirectToIdentityProvider = context =>
-                        {
-                            context.ProtocolMessage.SetParameter("audience",
-                                Configuration["Authentication:Keycloak:ClientId"]);
-
-                            return Task.FromResult(0);
-                        }
-                    };
                 })
-                .AddAutomaticTokenManagement(options => new AutomaticTokenManagementOptions
-                {
-                    Scheme = "Keycloak"
-                });
+                .AddKeycloakTokenManagement();
 
             services.AddHttpClient();
 
