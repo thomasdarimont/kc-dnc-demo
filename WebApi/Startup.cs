@@ -21,7 +21,12 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.ConfigureJwtAuthentication(Configuration);
+            services.ConfigureJwtAuthentication(options =>
+            {
+                options.Audience = Configuration["Jwt:Audience"];
+                options.Authority = Configuration["Jwt:Issuer"];
+                options.TokenValidationParameters.ValidIssuer = options.Authority;
+            });
             services.ConfigureJwtAuthorization();
 
             services.AddAuthorization(options =>

@@ -13,48 +13,38 @@ namespace WebApi.Jwt
 {
     public static class JwtConfiguration
     {
-        public static void ConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureJwtAuthentication(this IServiceCollection services,
+            Action<JwtBearerOptions> configureOptions)
         {
-            string audience = configuration["Jwt:Audience"];
-            string issuer = configuration["Jwt:Issuer"];
-
             services.AddAuthentication(options => { options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; })
                 .AddJwtBearer(options =>
                 {
-                    options.Audience = audience;
-                    options.Authority = issuer;
-                    options.RequireHttpsMetadata = false;
-                    options.IncludeErrorDetails = true;
-
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateAudience = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidateIssuer = true,
-                        ValidIssuer = issuer,
-                        ValidateLifetime = true
-                    };
-
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnTokenValidated = context =>
-                        {
-                            // Extract Keycloak Client Roles from JWT
-
-                            var resourceAccess = JObject.Parse(context.Principal.FindFirst("resource_access").Value);
-                            var clientResource = resourceAccess[context.Principal.FindFirstValue("aud")];
-                            var clientRoles = clientResource["roles"];
-                            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-
-                            foreach (var clientRole in clientRoles)
-                            {
-                                claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, clientRole.ToString()));
-                            }
-
-                            return Task.CompletedTask;
-                        }
-                    };
+                    ConfigureDefaultJwtAuthentication(options);
+                    configureOptions.Invoke(options);
                 });
+        }
+
+        private static void ConfigureDefaultJwtAuthentication(JwtBearerOptions options)
+        {
+            options.RequireHttpsMetadata = false;
+            options.IncludeErrorDetails = true;
+
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = true,
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = true,
+                ValidateLifetime = true
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnTokenValidated = context =>
+                {
+                    MapKeycloakRolesToRoleClaims(context);
+                    return Task.CompletedTask;
+                }
+            };
         }
 
         public static void ConfigureJwtAuthorization(this IServiceCollection services)
@@ -65,6 +55,23 @@ namespace WebApi.Jwt
                     .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                     .RequireAuthenticatedUser().Build());
             });
+        }
+
+        private static void MapKeycloakRolesToRoleClaims(TokenValidatedContext context)
+        {
+            var resourceAccess = JObject.Parse(context.Principal.FindFirst("resource_access").Value);
+            var clientResource = resourceAccess[context.Principal.FindFirstValue("aud")];
+            var clientRoles = clientResource["roles"];
+            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+            if (claimsIdentity == null)
+            {
+                return;
+            }
+
+            foreach (var clientRole in clientRoles)
+            {
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, clientRole.ToString()));
+            }
         }
     }
 }

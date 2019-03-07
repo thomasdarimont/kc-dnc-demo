@@ -9,6 +9,9 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
+///
+/// Adapted from https://github.com/IdentityServer/IdentityServer4.Samples/tree/master/Clients/src/MvcHybridAutomaticRefresh/AutomaticTokenManagement
+/// If a refresh-token is no longer valid, we sign-out the user "locally", by removing authentication cookies.
 namespace IdentityModel.AspNetCore
 {
     public class AutomaticTokenManagementCookieEvents : CookieAuthenticationEvents
@@ -71,6 +74,7 @@ namespace IdentityModel.AspNetCore
                         if (response.IsError)
                         {
                             _logger.LogWarning("Error refreshing token: {error}", response.Error);
+                            // Sign-out user in case refresh token is no longer valid
                             await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                             return;
                         }

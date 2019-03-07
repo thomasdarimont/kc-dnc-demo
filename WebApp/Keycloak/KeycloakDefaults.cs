@@ -12,5 +12,7 @@ namespace WebApp.Keycloak
         public const string SignedOutCallbackPath = "/oauth/logout";
 
         public const string SignedOutRedirectUri = "/";
+
+        public const string ResponseType = "code";
     }
 }

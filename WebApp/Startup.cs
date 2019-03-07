@@ -1,17 +1,10 @@
-﻿using System.Net.Http;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using IdentityModel.AspNetCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
-using WebApp.Backend;
 using WebApp.Keycloak;
 
 namespace WebApp
@@ -54,21 +47,6 @@ namespace WebApp
                 .AddKeycloakTokenManagement();
 
             services.AddHttpClient();
-
-
-            services.AddScoped<IBackendService, BackendService>();
-
-            services.AddSingleton<KeycloakAccessTokenHandler>();
-            services.AddHttpClient<IBackendService, BackendService>()
-                .AddHttpMessageHandler<KeycloakAccessTokenHandler>()
-                .ConfigurePrimaryHttpMessageHandler(h => new HttpClientHandler
-                {
-                    //hack to get around self-signed cert errors in dev
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; },
-                });
-
-            // Allows us to access HttpContext Information for Backend Requests
-            services.AddHttpContextAccessor();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

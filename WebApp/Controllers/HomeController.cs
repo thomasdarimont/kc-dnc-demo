@@ -8,19 +8,20 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using WebApp.Backend;
+using Microsoft.Extensions.Configuration;
 using WebApp.Models;
 
 namespace WebApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IBackendService _backendService;
+        private readonly string _backendUrl;
 
-        public HomeController(IBackendService backendService)
+        public HomeController(IConfiguration configuration)
         {
-            _backendService = backendService;
+            _backendUrl = configuration["BackendService:baseUrl"];
         }
+
 
         public IActionResult Index()
         {
@@ -44,8 +45,8 @@ namespace WebApp.Controllers
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
 
-            var userData = await _backendService.GetUserDataAsync();
-            var adminData = await _backendService.GetAdminDataAsync();
+            var userData = await CallThirdPartyServiceWithBearerAsync(accessToken, $"{_backendUrl}/user");
+            var adminData = await CallThirdPartyServiceWithBearerAsync(accessToken, $"{_backendUrl}/admin");
 
             return View(new ApiResponseModel {UserData = userData, AdminData = adminData});
         }
@@ -62,6 +63,31 @@ namespace WebApp.Controllers
                 ErrorMessage = exceptionHandlerPathFeature?.Error.Message,
                 RequestPath = exceptionHandlerPathFeature?.Path
             });
+        }
+
+
+        private async Task<string> CallThirdPartyServiceWithBearerAsync(string accessToken, string url)
+        {
+            using (var httpClientHandler = new HttpClientHandler())
+            {
+                //hack to get around self-signed cert errors in dev
+                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+
+                using (var httpClient = new HttpClient(httpClientHandler))
+                {
+                    httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", accessToken);
+                    try
+                    {
+                        var content = await httpClient.GetStringAsync(url);
+                        return content;
+                    }
+                    catch (Exception e)
+                    {
+                        return "tilt: " + e;
+                    }
+                }
+            }
         }
     }
 }

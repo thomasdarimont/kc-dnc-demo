@@ -1,5 +1,8 @@
 ﻿using System;
 
+///
+/// Adapted from https://github.com/IdentityServer/IdentityServer4.Samples/tree/master/Clients/src/MvcHybridAutomaticRefresh/AutomaticTokenManagement
+/// 
 namespace IdentityModel.AspNetCore
 {
     public class AutomaticTokenManagementOptions
