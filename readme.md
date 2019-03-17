@@ -5,7 +5,9 @@ The example consists of two modules:
 * WebApi - A simple stateless REST Web-Service that is secured with JWT authentication.
 * WebApp - A simple Web App that is secured via Keycloak.
 
-The WebApp demonstrates a basic integration with Keycloak. The following features are currently supported:
+The WebApp module demonstrates a basic integration with Keycloak by leveraging the built-in OpenID Connect support in AspNetCore which is additionally augmented with Keycloak specific configuration, like client role extraction. Further more, the WebApp calls the WebApi with an Access-Token provided after a successful authentication, to demonstrate calls to backend services.
+
+The following features are currently supported:
 * Single-Sign in with Keycloak
 * Logout with Keycloak
 * Access client specific role information (`resource_access` claim)
@@ -14,5 +16,6 @@ The WebApp demonstrates a basic integration with Keycloak. The following feature
 
 # Third-Party Components
 
-The 
-[Automatic Token Management](https://github.com/IdentityServer/IdentityServer4.Samples/tree/master/Clients/src/MvcHybridAutomaticRefresh/AutomaticTokenManagement) automatically renews the Access-Token in the background.
+The example uses the following third-party components:
+* [Automatic Token Management](https://github.com/IdentityServer/IdentityServer4.Samples/tree/master/Clients/src/MvcHybridAutomaticRefresh/AutomaticTokenManagement) 
+Automatically renews the Access-Token in the background of the WebApp module.
