@@ -14,6 +14,13 @@ The following features are currently supported:
 * Automatic Access-Token refresh in background
 * Extract Access-Token to call backend-services.
 
+# Building
+Note you need .Net Core 2.2, which you can get here: [.Net Core 2.2 Download](https://dotnet.microsoft.com/download/dotnet-core/2.2)
+
+```
+dotnet restore
+```
+
 # Third-Party Components
 
 The example uses the following third-party components:
