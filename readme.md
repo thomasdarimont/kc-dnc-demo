@@ -19,6 +19,8 @@ Note you need .Net Core 2.2, which you can get here: [.Net Core 2.2 Download](ht
 
 ```
 dotnet restore
+
+dotnet build
 ```
 
 # Running
@@ -37,7 +39,18 @@ bin/standalone.sh \
 bin/standalone.sh
 ```
 
-> Start the WebApp and WebApi and login via https://localhost:5001
+> Start the WebApp 
+```
+//TODO
+```
+
+> Start the WebApp
+```
+//TODO
+```
+
+> Login via https://localhost:5001
+
 * Login with tester:test
 * Login with admin:test
 
