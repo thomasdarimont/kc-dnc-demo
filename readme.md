@@ -21,6 +21,27 @@ Note you need .Net Core 2.2, which you can get here: [.Net Core 2.2 Download](ht
 dotnet restore
 ```
 
+# Running
+
+> Import `dnc-demo-realm.json` via:
+```
+bin/standalone.sh \
+-Djboss.socket.binding.port-offset=10000 \
+-Dkeycloak.migration.action=import \
+-Dkeycloak.migration.file=/path/to/dnc-demo-realm.json \
+-Dkeycloak.migration.strategy=OVERWRITE_EXISTING
+```
+
+> Start keycloak
+```
+bin/standalone.sh
+```
+
+> Start the WebApp and WebApi and login via https://localhost:5001
+* Login with tester:test
+* Login with admin:test
+
+
 # Third-Party Components
 
 The example uses the following third-party components:
