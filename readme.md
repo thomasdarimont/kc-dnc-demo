@@ -23,20 +23,28 @@ dotnet restore
 dotnet build
 ```
 
+## Setup https for dotnet core
+TODO
+
 # Running
 
-> Import `dnc-demo-realm.json` via:
+> Start Keycloak with the dnc-demo Realm 
 ```
-bin/standalone.sh \
--Djboss.socket.binding.port-offset=10000 \
--Dkeycloak.migration.action=import \
--Dkeycloak.migration.file=/path/to/dnc-demo-realm.json \
--Dkeycloak.migration.strategy=OVERWRITE_EXISTING
-```
-
-> Start keycloak
-```
-bin/standalone.sh
+docker run \
+  -d \
+  --name keycloak-dnc \
+  -e KEYCLOAK_USER=admin \
+  -e KEYCLOAK_PASSWORD=admin \
+  --net=host \
+  -p 8080:8080 \
+  -v `pwd`/dnc-demo-realm.json:/config/dnc-demo-realm.json \
+  -it jboss/keycloak:5.0.0 \
+  -b 0.0.0.0 \
+  -Djboss.http.port=8080 \
+  -Dkeycloak.migration.action=import \
+  -Dkeycloak.migration.provider=singleFile \
+  -Dkeycloak.migration.file=/config/dnc-demo-realm.json \
+  -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
 ```
 
 > Start the WebApp 
@@ -44,15 +52,15 @@ bin/standalone.sh
 //TODO
 ```
 
-> Start the WebApp
+> Start the WebAPI
 ```
 //TODO
 ```
 
 > Login via https://localhost:5001
 
-* Login with tester:test
-* Login with admin:test
+* Login as user with tester:test
+* Login as admin with arno:test
 
 
 # Third-Party Components
