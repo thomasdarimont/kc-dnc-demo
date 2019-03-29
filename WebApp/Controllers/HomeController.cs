@@ -43,10 +43,8 @@ namespace WebApp.Controllers
 
         public async Task<IActionResult> BackendService()
         {
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-
-            var userData = await CallThirdPartyServiceWithBearerAsync(accessToken, $"{_backendUrl}/user");
-            var adminData = await CallThirdPartyServiceWithBearerAsync(accessToken, $"{_backendUrl}/admin");
+            var userData = await CallThirdPartyServiceAsync($"{_backendUrl}/user");
+            var adminData = await CallThirdPartyServiceAsync($"{_backendUrl}/admin");
 
             return View(new ApiResponseModel {UserData = userData, AdminData = adminData});
         }
@@ -66,8 +64,10 @@ namespace WebApp.Controllers
         }
 
 
-        private async Task<string> CallThirdPartyServiceWithBearerAsync(string accessToken, string url)
+        private async Task<string> CallThirdPartyServiceAsync(string url)
         {
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+            
             using (var httpClientHandler = new HttpClientHandler())
             {
                 //hack to get around self-signed cert errors in dev
@@ -75,8 +75,7 @@ namespace WebApp.Controllers
 
                 using (var httpClient = new HttpClient(httpClientHandler))
                 {
-                    httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", accessToken);
+                    httpClient.SetBearerToken(accessToken);
                     try
                     {
                         var content = await httpClient.GetStringAsync(url);
