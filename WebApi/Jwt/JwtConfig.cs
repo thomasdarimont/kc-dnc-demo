@@ -3,10 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 
 namespace WebApi.Jwt
@@ -28,14 +25,12 @@ namespace WebApi.Jwt
         {
             options.RequireHttpsMetadata = false;
             options.IncludeErrorDetails = true;
-
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateAudience = true,
-                ValidateIssuerSigningKey = true,
-                ValidateIssuer = true,
-                ValidateLifetime = true
-            };
+            
+            options.TokenValidationParameters.ValidateAudience = true;
+            options.TokenValidationParameters.ValidateIssuerSigningKey = true;
+            options.TokenValidationParameters.ValidateIssuer = true;
+            options.TokenValidationParameters.ValidateLifetime = true;
+        
 
             options.Events = new JwtBearerEvents
             {
@@ -59,6 +54,7 @@ namespace WebApi.Jwt
 
         private static void MapKeycloakRolesToRoleClaims(TokenValidatedContext context)
         {
+            // Note that we need to expose the realm_access / resource_access claims in the IDToken!
             var resourceAccess = JObject.Parse(context.Principal.FindFirst("resource_access").Value);
             var clientResource = resourceAccess[context.Principal.FindFirstValue("aud")];
             var clientRoles = clientResource["roles"];

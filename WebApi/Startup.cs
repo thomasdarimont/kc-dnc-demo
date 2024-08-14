@@ -21,10 +21,12 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.ConfigureJwtAuthentication(options =>
             {
+                // Additional configuration
                 options.Audience = Configuration["Jwt:Audience"];
-                options.Authority = Configuration["Jwt:Issuer"];
+                options.Authority = Configuration["Jwt:Authority"];
                 options.TokenValidationParameters.ValidIssuer = options.Authority;
             });
             services.ConfigureJwtAuthorization();
@@ -34,7 +36,10 @@ namespace WebApi
                 options.DefaultPolicy = new AuthorizationPolicyBuilder(
                     JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().Build();
             });
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(options =>
+            {
+                options.EnableEndpointRouting = false;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

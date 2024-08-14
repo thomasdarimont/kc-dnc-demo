@@ -1,4 +1,5 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityModel.AspNetCore;
@@ -78,6 +79,7 @@ namespace WebApp.Keycloak
 
         private static void MapKeycloakRolesToRoleClaims(TokenValidatedContext context)
         {
+            // Note that we need to expose the realm_access / resource_access claims in the IDToken!
             var resourceAccess = JObject.Parse(context.Principal.FindFirst("resource_access").Value);
             var clientResource = resourceAccess[context.Options.ClientId];
             var clientRoles = clientResource["roles"];
